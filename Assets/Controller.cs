@@ -28,7 +28,9 @@ public class Controller : MonoBehaviour
         _lifeT.GetComponent<Renderer>().material.color = Color.blue;
         _timeT.GetComponent<Renderer>().material.color = Color.green;
         _life = 1;
-        _time = 1;
+        _time = 0;
+
+        Switch();
     }
 
     Vector2 _direction;
@@ -64,7 +66,7 @@ public class Controller : MonoBehaviour
     }
 
     private GameObject _bed, _office;
-    private bool _day = true;
+    private bool _day = false;
     private void Switch()
     {
         _bed.SetActive(_day);
@@ -83,14 +85,32 @@ public class Controller : MonoBehaviour
         _rigidBody.velocity = _direction * 5;
     }
 
+    private static int A;
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.name.Contains("Z"))
         {
-            collision.transform.localPosition *= -1;
+            var pos = collision.transform.localPosition;
+            if (pos.magnitude < 3)
+            {
+                pos += (Vector3)Random.insideUnitCircle.normalized * 3;
+            }
+
+            pos.x *= -1;
+            collision.transform.localPosition = pos;
+            if (A++ < 20)
+            {
+                var next = Instantiate(collision.gameObject);
+                pos.x *= -1;
+                pos.y *= -1;
+                next.transform.localPosition = pos;
+            }
             if (_day)
             {
-                _life -= 0.2f;
+                if (_invincible <= 0)
+                {
+                    _life -= 0.2f;
+                }
             }
             else
             {
